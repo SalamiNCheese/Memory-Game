@@ -1,0 +1,49 @@
+[gd_scene load_steps=3 format=3 uid="uid://b1l2u7cbis8mk"]
+
+[ext_resource type="Script" uid="uid://blq31ieiah6q1" path="res://scripts/Game.gd" id="1_wbfu4"]
+[ext_resource type="PackedScene" uid="uid://d1g5iy4bkv3q" path="res://scripts/HUD.tscn" id="2_xkndl"]
+
+[node name="Game" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wbfu4")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.054902, 0.823529, 0.32549, 1)
+
+[node name="grid" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 40.0
+offset_right = -40.0
+offset_bottom = -258.0
+grow_horizontal = 2
+grow_vertical = 2
+columns = 11
+
+[node name="HUD" parent="." instance=ExtResource("2_xkndl")]
+layout_mode = 1
+mouse_filter = 2
+
+[node name="Panel" parent="HUD" index="0"]
+offset_left = 134.0
+offset_top = 853.0
+offset_right = -112.0
+
+[node name="ButtonReset" parent="HUD/Panel/Sections/SectionButtons" index="1"]
+process_mode = 3
+
+[editable path="HUD"]

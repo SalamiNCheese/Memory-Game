@@ -1,0 +1,129 @@
+[gd_scene load_steps=8 format=3 uid="uid://d1g5iy4bkv3q"]
+
+[ext_resource type="FontFile" uid="uid://44xawmlk2cgb" path="res://assets/fonts/Nunito-Bold.ttf" id="1_k5de2"]
+[ext_resource type="Theme" uid="uid://d4avfb4i41ioh" path="res://themeHUD1.tres" id="1_ne771"]
+[ext_resource type="Texture2D" uid="uid://c87a7pe62nmv4" path="res://assets/ui/return.png" id="3_vow1y"]
+[ext_resource type="Texture2D" uid="uid://d3p5gblyhsif1" path="res://assets/ui/pause.png" id="4_ne771"]
+[ext_resource type="Script" uid="uid://pual2hqdc1ib" path="res://ButtonPause.gd" id="4_xxqia"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ne771"]
+
+[sub_resource type="Theme" id="Theme_xxqia"]
+/styles/panel = SubResource("StyleBoxFlat_ne771")
+
+[node name="HUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_ne771")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 577.0
+offset_right = -40.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_xxqia")
+
+[node name="Sections" type="HBoxContainer" parent="Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SectionScore" type="VBoxContainer" parent="Panel/Sections"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScoreLabel" type="Label" parent="Panel/Sections/SectionScore"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 35
+text = "PONTUAÇÃO:"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="ScoreDisplay" type="Label" parent="Panel/Sections/SectionScore"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 80
+text = "##"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SectionTimer" type="VBoxContainer" parent="Panel/Sections"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TimerLabel" type="Label" parent="Panel/Sections/SectionTimer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 35
+text = "SEGUNDOS:"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="TimerDisplay" type="Label" parent="Panel/Sections/SectionTimer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 80
+text = "##"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SectionMoves" type="VBoxContainer" parent="Panel/Sections"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MovesLabel" type="Label" parent="Panel/Sections/SectionMoves"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 35
+text = "PARES VIRADOS:"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="MovesDisplay" type="Label" parent="Panel/Sections/SectionMoves"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_fonts/font = ExtResource("1_k5de2")
+theme_override_font_sizes/font_size = 80
+text = "##"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="SectionButtons" type="VBoxContainer" parent="Panel/Sections"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.35
+
+[node name="ButtonPause" type="TextureButton" parent="Panel/Sections/SectionButtons"]
+process_mode = 3
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("4_ne771")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("4_xxqia")
+
+[node name="ButtonReset" type="TextureButton" parent="Panel/Sections/SectionButtons"]
+layout_mode = 2
+size_flags_vertical = 3
+texture_normal = ExtResource("3_vow1y")
+ignore_texture_size = true
+stretch_mode = 5
