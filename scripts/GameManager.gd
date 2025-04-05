@@ -23,7 +23,7 @@ var score = 0
 var timerSec = 0
 var moves = 0
 ##-------------------------------------------
-var goal = 2 # Para teste, mudar número depois <---------------------------------------------------------
+var goal = 10 # Para teste, mudar número depois <---------------------------------------------------------
 ##-------------------------------------------
 var scoreLabel
 var timerSecLabel
@@ -83,7 +83,7 @@ func fillDeck():
 	var v = 0
 	while(s < 2):
 		v = 0
-		while(v < 11):
+		while(v < 10):
 			deck.append(Card.new(v))
 			v += 1
 		s += 1
