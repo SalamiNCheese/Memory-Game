@@ -23,13 +23,19 @@ var score = 0
 var timerSec = 0
 var moves = 0
 ##-------------------------------------------
-var goal = 10 # Para teste, mudar número depois <---------------------------------------------------------
+var goal = 3 # Para teste, mudar número depois <---------------------------------------------------------
 ##-------------------------------------------
 var scoreLabel
 var timerSecLabel
 var movesLabel
 
 var resetButton
+var exitButton
+
+## Medir tempo de reação
+var timeStart = 0
+var elapsedTime = 0
+var reaction = Array()
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -41,6 +47,7 @@ func _ready():
 	setupHUD()
 	var firstScreen = popUp.instantiate()
 	Game.add_child(firstScreen)
+	
 
 ## -----------------MÉTODOS------------------
 
@@ -51,8 +58,10 @@ func setupHUD():
 	timerSecLabel = Game.get_node('HUD/Panel/Sections/SectionTimer/TimerDisplay')
 	movesLabel = Game.get_node('HUD/Panel/Sections/SectionMoves/MovesDisplay')
 	resetButton = Game.get_node('HUD/Panel/Sections/SectionButtons/ButtonReset')
+	exitButton = Game.get_node('HUD/Panel2/SectionExit/ButtonExit')
 	
 	resetButton.connect("pressed", Callable(self, "resetGame"))
+	exitButton.connect("pressed", Callable(self, "exitGame"))
 	
 	## Atribuição dos valores
 	scoreLabel.text = str(score)
@@ -75,7 +84,7 @@ func setupTimers():
 	secondsTimer.connect("timeout", Callable(self, "countSeconds"))
 	add_child(secondsTimer)
 	secondsTimer.start() ## Iniciar o temporizador
-
+	
 
 ## Preencher o Deck
 func fillDeck():
@@ -102,14 +111,20 @@ func chooseCard(c):
 		card1 = c
 		card1.flip()
 		card1.set_disabled(true) ## Impedir que o jogador clique na carta 2x
+		timeStart = Time.get_ticks_msec()
 	
 	elif(card2 == null):
 		card2 = c
 		card2.flip()
 		card2.set_disabled(true) ## Impedir que o jogador clique na carta 2x
-		moves += 1
+		moves += 1 ## Pares Virados
 		movesLabel.text = str(moves)
 		checkCards()
+		
+		## Tempo que o jogador levou para clicar nas cartas
+		elapsedTime = Time.get_ticks_msec() - timeStart
+		reaction.append(elapsedTime)
+		print(reaction)
 
 func checkCards():
 	if(card1.value == card2.value):
@@ -141,6 +156,7 @@ func matchCardsAndScore():
 		var winScreen = popUp.instantiate()
 		Game.add_child(winScreen)
 		winScreen.setupWinScreen()
+		saveData(str(reaction))
 
 ## Contar o Tempo
 func countSeconds():
@@ -162,3 +178,17 @@ func resetGame():
 	randomize()
 	deck.shuffle()
 	dealDeck()
+
+func exitGame():
+	get_tree().quit()
+
+
+func loadData():
+	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
+	var content = file.get_as_text()
+	return content
+	
+func saveData(content):
+	var file = FileAccess.open("user://Dados.txt", FileAccess.WRITE)
+	file.store_string(str(content))
+	
