@@ -22,8 +22,10 @@ var secondsTimer = Timer.new()
 var score = 0
 var timerSec = 0
 var moves = 0
+
+var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
 ##-------------------------------------------
-var goal = 3 # Para teste, mudar número depois <---------------------------------------------------------
+var goal = 3 ## Para teste, mudar número depois <---------------------------------------------------------
 ##-------------------------------------------
 var scoreLabel
 var timerSecLabel
@@ -119,19 +121,22 @@ func chooseCard(c):
 		card2.set_disabled(true) ## Impedir que o jogador clique na carta 2x
 		moves += 1 ## Pares Virados
 		movesLabel.text = str(moves)
+		resetButton.set_disabled(true) ## Impedir que o jogador resete enquanto está comparando
 		checkCards()
 		
 		## Tempo que o jogador levou para clicar nas cartas
 		elapsedTime = Time.get_ticks_msec() - timeStart
 		reaction.append(elapsedTime)
+		
 		print(reaction)
 
 func checkCards():
 	if(card1.value == card2.value):
 		matchTimer.start(0.15)
-	
+
 	else:
 		flipTimer.start(1)
+
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
 func turnOverCards():
@@ -141,6 +146,7 @@ func turnOverCards():
 	card2.set_disabled(false)
 	card1 = null
 	card2 = null
+	resetButton.set_disabled(false) ## Permitir que o jogador clique no botão de Reset
 
 ## Aplicar filtro e contar pontuação (Jogador acertou o par)
 func matchCardsAndScore():
@@ -157,6 +163,11 @@ func matchCardsAndScore():
 		Game.add_child(winScreen)
 		winScreen.setupWinScreen()
 		saveData(str(reaction))
+		hudCount.append(score)
+		hudCount.append(timerSec)
+		hudCount.append(moves)
+		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
+		print(hudCount) 
 
 ## Contar o Tempo
 func countSeconds():
@@ -180,15 +191,27 @@ func resetGame():
 	dealDeck()
 
 func exitGame():
+	
 	get_tree().quit()
 
 
 func loadData():
+	## CAMINHO:
+	## C:\Users\user_name\AppData\Roaming\Godot\app_userdata\Memory Game\Dados.txt
+	
 	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
 	var content = file.get_as_text()
 	return content
-	
+
+func loadData2():
+	var file = FileAccess.open("user://Dados2.txt", FileAccess.READ)
+	var content2 = file.get_as_text()
+	return content2
+
 func saveData(content):
 	var file = FileAccess.open("user://Dados.txt", FileAccess.WRITE)
 	file.store_string(str(content))
 	
+func saveData2(content2):
+	var file = FileAccess.open("user://Dados2.txt", FileAccess.WRITE)
+	file.store_string(str(content2))

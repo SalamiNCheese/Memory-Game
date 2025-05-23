@@ -4,12 +4,12 @@
 [ext_resource type="Theme" uid="uid://d4avfb4i41ioh" path="res://themeHUD1.tres" id="1_ne771"]
 [ext_resource type="Texture2D" uid="uid://c87a7pe62nmv4" path="res://assets/ui/return.png" id="3_vow1y"]
 [ext_resource type="Texture2D" uid="uid://d3p5gblyhsif1" path="res://assets/ui/pause.png" id="4_ne771"]
-[ext_resource type="Script" uid="uid://pual2hqdc1ib" path="res://ButtonPause.gd" id="4_xxqia"]
+[ext_resource type="Script" uid="uid://pual2hqdc1ib" path="res://scripts/ButtonPause.gd" id="4_xxqia"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ne771"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lgql5"]
 
 [sub_resource type="Theme" id="Theme_xxqia"]
-/styles/panel = SubResource("StyleBoxFlat_ne771")
+/styles/panel = SubResource("StyleBoxFlat_lgql5")
 
 [node name="HUD" type="Control"]
 layout_mode = 3
@@ -122,6 +122,7 @@ stretch_mode = 5
 script = ExtResource("4_xxqia")
 
 [node name="ButtonReset" type="TextureButton" parent="Panel/Sections/SectionButtons"]
+process_mode = 1
 layout_mode = 2
 size_flags_vertical = 3
 texture_normal = ExtResource("3_vow1y")
