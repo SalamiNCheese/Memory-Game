@@ -57,7 +57,7 @@ custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_hx1qj")
 theme_override_font_sizes/font_size = 30
-text = "Vire todas as cartas em pares para ganhar! Há 26 cartas!"
+text = "Vire todas as cartas em pares para ganhar! Há 20 cartas!"
 horizontal_alignment = 1
 vertical_alignment = 1
 

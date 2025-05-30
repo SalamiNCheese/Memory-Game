@@ -19,10 +19,8 @@ func _init(v):
 	back = GameManager.cardBack
 	set_texture_normal(back)
 
-
 func _pressed():
 	GameManager.chooseCard(self) ## GameManager fará as alterações, ponteiro para carta
-
 
 ## Adicionar delay nas cartas ao virar
 func flip():
@@ -31,5 +29,3 @@ func flip():
 		set_texture_normal(face)
 	else:
 		set_texture_normal(back)
-	
-	
