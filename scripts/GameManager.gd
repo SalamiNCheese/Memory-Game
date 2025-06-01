@@ -124,6 +124,7 @@ func fillDeck():
 			v = 5
 			s += 1
 
+
 ## Distribuir as Cartas / Colocar no tabuleiro
 func dealDeck():
 	var c = 0
@@ -183,9 +184,12 @@ func autoChoose():
 	
 		while(is_busy):
 			await get_tree().process_frame
+		
 		control2Cards += 1
 		chooseCard(deck[i])
+		
 		await get_tree().create_timer(0.5).timeout
+		
 		if(scoreControl == goal):
 			scoreControl = 0
 			return
@@ -195,8 +199,11 @@ func autoChoose():
 			used.append(i)
 			used.append(i-1)
 			memory.erase(value)
-		
+			
+			
 		await get_tree().create_timer(0.5).timeout
+		
+		
 		if(scoreControl == goal):
 			scoreControl = 0
 			return
@@ -207,7 +214,10 @@ func autoChoose():
 			var j = memory[value]  ## Atualizar se existir valor no dicionário
 			control2Cards += 1
 			chooseCard(deck[j])
+			
+			
 			await get_tree().create_timer(0.5).timeout
+			
 			
 			if(scoreControl == goal):
 				scoreControl = 0
@@ -219,8 +229,11 @@ func autoChoose():
 				turnOver = false
 				control2Cards += 1
 				chooseCard(deck[i])
+				matchCards = false
+				
 				await get_tree().create_timer(0.5).timeout
-			
+				
+				
 			
 			if(scoreControl == goal):
 					scoreControl = 0
@@ -237,16 +250,20 @@ func autoChoose():
 			used.append(i)
 			used.append(j)
 			memory.erase(value)
+			
 		
 		else:
 			## Salvar carta na memória
 			memory[value] = i
+			
 			if(matchCards == true && control2Cards % 2 == 0 && control2Cards > 0):
 				memory.erase(value)
 				matchCards = false
+				
 		
 		i += 1
 		await get_tree().create_timer(0.5).timeout
+		
 
 
 
