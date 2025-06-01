@@ -24,6 +24,7 @@ var secondsTimer = Timer.new()
 var score = 0
 var timerSec = 0
 var moves = 0
+var scoreControl = 0
 
 var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
 ##-------------------------------------------
@@ -42,6 +43,10 @@ var reaction = Array()
 var perfect = 0
 var times = 5
 var is_busy = false
+var turnOver = false
+var matchCards = false
+var autoPlay = false
+var control2Cards = 0
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -52,12 +57,12 @@ func _ready():
 	setupTimers()
 	setupHUD()
 	## Normal Play
-	var firstScreen = popUp.instantiate()
-	Game.add_child(firstScreen)
+	#var firstScreen = popUp.instantiate()
+	#Game.add_child(firstScreen)
 	## AutoPlay
-	#await get_tree().process_frame ## Esperar renderização
-	#await get_tree().create_timer(0.5).timeout ## Esperar meio segundo
-	#autoLoop(times)
+	await get_tree().process_frame ## Esperar renderização
+	await get_tree().create_timer(0.5).timeout ## Esperar meio segundo
+	autoLoop(times)
 
 ## -----------------MÉTODOS------------------
 
@@ -128,11 +133,11 @@ func dealDeck():
 		c += 1
 
 ## Funcionar o jogo várias vezes seguidas
-func autoLoop(times):
+func autoLoop(t):
 	var rounds = 0
 	
 	## Número de rodadas
-	while(rounds < times):
+	while(rounds < t):
 		print(">>> Rodada ", rounds + 1)
 		if(score == goal):
 			## Resetar a rodada manualmente (como no resetGame)
@@ -151,36 +156,83 @@ func autoLoop(times):
 			dealDeck()
 		
 		await get_tree().process_frame ## Espera um frame antes de começar
+		scoreControl = 0
+		matchCards = false
+		turnOver = false
 		await autoChoose() ## Executa jogada automática
 		rounds += 1
 		
-		await get_tree().create_timer(1.0).timeout ## Espera um tempo antes de reiniciar
+		await get_tree().create_timer(0.8).timeout ## Espera um tempo antes de reiniciar
 
 
 ## Escolher as cartas automaticamente
 func autoChoose():
-	var memory = Dictionary() ## Dicionário: valor -> índice
+	var memory = Dictionary() ## Dicionário: valor ; posição
 	var used = Array()  ## Índices já combinados
 	var i = 0
-
+	var control = 0
+	var value = deck[i].value ## Valor da carta
+	autoPlay = true
+	control2Cards = 0
+	
 	while(i < deck.size()): ## Percorrer as cartas do baralho
-		if(i in used): ## Se a carta já fez par, pula para a próxima
+		while(i in used): ## Se a carta já fez par, pula para a próxima
 			i += 1
-			continue
-		
+			if(i >= deck.size()):
+				break
+	
+		while(is_busy):
+			await get_tree().process_frame
+		control2Cards += 1
 		chooseCard(deck[i])
-		await get_tree().create_timer(0.2).timeout
+		await get_tree().create_timer(0.5).timeout
+		if(scoreControl == goal):
+			scoreControl = 0
+			return
 		
-		var value = deck[i].value ## Valor da carta
+		if(matchCards == true && control2Cards % 2 == 0 && control2Cards > 0):
+			value = deck[i].value
+			used.append(i)
+			used.append(i-1)
+			memory.erase(value)
+		
+		await get_tree().create_timer(0.5).timeout
+		if(scoreControl == goal):
+			scoreControl = 0
+			return
+		
+		value = deck[i].value ## Valor da carta
 		
 		if(memory.has(value) && memory[value] not in used): ## Verifica se já existe esse valor no dicionário
 			var j = memory[value]  ## Atualizar se existir valor no dicionário
+			control2Cards += 1
 			chooseCard(deck[j])
-			await get_tree().create_timer(1.0).timeout
-			if(j in used): ## Se a carta já fez par, pula para a próxima
+			await get_tree().create_timer(0.5).timeout
+			
+			if(scoreControl == goal):
+				scoreControl = 0
+				return
+			
+			matchCards = false
+			
+			if(turnOver == true && control2Cards % 2 != 0):
+				turnOver = false
+				control2Cards += 1
+				chooseCard(deck[i])
+				await get_tree().create_timer(0.5).timeout
+			
+			
+			if(scoreControl == goal):
+					scoreControl = 0
+					return
+					
+			while(j in used): ## Se a carta já fez par, pula para a próxima
 				i += 1
-				continue
-	
+				
+			if(scoreControl == goal):
+				scoreControl = 0
+				return
+			
 			## Se der Match, marcar como usado
 			used.append(i)
 			used.append(j)
@@ -189,9 +241,13 @@ func autoChoose():
 		else:
 			## Salvar carta na memória
 			memory[value] = i
+			if(matchCards == true && control2Cards % 2 == 0 && control2Cards > 0):
+				memory.erase(value)
+				matchCards = false
 		
 		i += 1
-		await get_tree().create_timer(0.3).timeout
+		await get_tree().create_timer(0.5).timeout
+
 
 
 ## Ponteiro para carta
@@ -231,10 +287,14 @@ func chooseCard(c):
 ## Checar se as cartas são iguais
 func checkCards():
 	if(card1.value == card2.value):
+		if(autoPlay == true && control2Cards % 2 == 0):
+			matchCards = true
 		matchTimer.start(0.15)
 
 	else:
-		flipTimer.start(1)
+		if(autoPlay == true && control2Cards % 2 == 0):
+			turnOver = true
+		flipTimer.start(0.4)
 
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
@@ -260,13 +320,13 @@ func matchCardsAndScore():
 	card2 = null
 	resetButton.set_disabled(false) ## Permitir que o jogador clique no botão de Reset
 	is_busy = false ## Não está mais ocupado (autoChoose pode voltar a escolher cartas)
-	
 	## Quando vencer o jogo
 	if(score == goal):
+		scoreControl = goal
 		## Jogo normal (Sem comentar) VS Jogo Teste Bot (Comentado)
-		var winScreen = popUp.instantiate()
-		Game.add_child(winScreen)
-		winScreen.setupWinScreen()
+		#var winScreen = popUp.instantiate()
+		#Game.add_child(winScreen)
+		#winScreen.setupWinScreen()
 		saveData(str(reaction))
 		reaction.clear()
 		hudCount.append(score)

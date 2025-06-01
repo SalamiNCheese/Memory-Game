@@ -26,6 +26,10 @@ window/size/viewport_height=1080
 window/size/borderless=true
 window/stretch/mode="canvas_items"
 
+[editor]
+
+movie_writer/movie_file="C:/Users/guilh/Desktop/Memory Game/bug.avi"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"
