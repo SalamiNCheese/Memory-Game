@@ -1,6 +1,7 @@
 extends Control
 
 var playButton
+var press
 
 ## Adicionar PopUp à cena
 func _ready():
@@ -11,7 +12,10 @@ func _ready():
 ## Iniciar um Novo Jogo
 func newGame():
 	get_tree().set_pause(false)
-	GameManager.resetGame() ## Para quando o jogo for vencido
+	if(GameManager.score == GameManager.goal):
+		GameManager.resetGame(false) ## Para quando o jogo for vencido
+		await get_tree().create_timer(1.5).timeout
+		GameManager.revealCards()
 	queue_free() ## Deletar/Liberar (da memória) a cena PopUp
 
 ## Trocar imagem de vitória

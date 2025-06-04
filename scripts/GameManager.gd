@@ -27,11 +27,12 @@ var moves = 0
 
 var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
 ##-------------------------------------------
-var goal = 10 ## Para teste, mudar número depois <---------------------------------------------------------
+var goal = 3 ## Para teste, mudar número depois <---------------------------------------------------------
 ##-------------------------------------------
 
 var resetButton
 var exitButton
+var pauseButton
 
 ## Medir tempo de reação
 var timeStart = 0
@@ -42,6 +43,7 @@ var reaction = Array()
 var perfect = 0
 var times = 5
 var is_busy = false
+var changeShow
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -51,6 +53,7 @@ func _ready():
 	dealDeck()
 	setupTimers()
 	setupHUD()
+	await revealCards()
 	## Normal Play
 	var firstScreen = popUp.instantiate()
 	Game.add_child(firstScreen)
@@ -69,6 +72,7 @@ func setupHUD():
 	movesLabel = Game.get_node('HUD/Panel/Sections/SectionMoves/MovesDisplay')
 	resetButton = Game.get_node('HUD/Panel/Sections/SectionButtons/ButtonReset')
 	exitButton = Game.get_node('HUD/Panel2/SectionExit/ButtonExit')
+	pauseButton = Game.get_node("HUD/Panel/Sections/SectionButtons/ButtonPause")
 	
 	resetButton.connect("pressed", Callable(self, "resetGame"))
 	exitButton.connect("pressed", Callable(self, "exitGame"))
@@ -127,6 +131,27 @@ func dealDeck():
 		Game.get_node('grid').add_child(deck[c])
 		c += 1
 
+func revealCards():
+	is_busy = true
+	pauseButton.can_pause = false
+	resetButton.set_disabled(true)
+	exitButton.set_disabled(true)
+	pauseButton.set_disabled(true)
+	
+	for c in deck:
+		c.flip()
+	
+	await get_tree().create_timer(2.0).timeout
+	
+	for c in deck:
+		c.flip()
+	
+	is_busy = false
+	resetButton.set_disabled(false)
+	exitButton.set_disabled(false)
+	pauseButton.can_pause = true
+	pauseButton.set_disabled(false)
+	
 ## Funcionar o jogo várias vezes seguidas
 func autoLoop(times):
 	var rounds = 0
@@ -225,8 +250,6 @@ func chooseCard(c):
 		## Tempo que o jogador levou para clicar nas cartas
 		elapsedTime = Time.get_ticks_msec() - timeStart
 		reaction.append(elapsedTime)
-		
-		print(reaction)
 
 ## Checar se as cartas são iguais
 func checkCards():
@@ -268,6 +291,7 @@ func matchCardsAndScore():
 		Game.add_child(winScreen)
 		winScreen.setupWinScreen()
 		saveData(str(reaction))
+		print(reaction)
 		reaction.clear()
 		hudCount.append(score)
 		hudCount.append(timerSec)
@@ -275,7 +299,6 @@ func matchCardsAndScore():
 		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 		print(hudCount)
 		hudCount.clear()
-		OS.shell_open(ProjectSettings.globalize_path("user://"))
 		resetGame()
 
 ## Contar o Tempo
@@ -284,7 +307,7 @@ func countSeconds():
 	timerSecLabel.text = str(timerSec)
 
 ## Resetar o Jogo
-func resetGame():
+func resetGame(show_reveal = true):
 	for c in range(deck.size()):
 		deck[c].queue_free() ## Deletar as cartas
 	deck.clear() ## Verificar que deletou os ponteiros
@@ -298,11 +321,15 @@ func resetGame():
 	randomize() ## Para fazer o aleatório
 	deck.shuffle() ## Para fazer o aleatório
 	dealDeck()
+	
+	if(show_reveal):
+		revealCards()
 
 ## Sair do jogo
 func exitGame():
 	## Salvar caso o jogador feche o jogo
 	saveData(str(reaction))
+	print(reaction)
 	reaction.clear()
 	hudCount.append(score)
 	hudCount.append(timerSec)
