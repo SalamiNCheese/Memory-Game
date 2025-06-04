@@ -39,14 +39,15 @@ var timeStart = 0
 var elapsedTime = 0
 var reaction = Array()
 
-## Se igual a 0, espelhado. Se igual 1, seguidas
-var perfect = 0
-var times = 5
+## Variáveis de Controle
+var perfect = 0 ## Se igual a 0, espelhado. Se igual 1, seguidas
+var times = 6
 var is_busy = false
 var turnOver = false
 var matchCards = false
 var autoPlay = false
 var control2Cards = 0
+var rand_time
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -163,7 +164,7 @@ func autoLoop(t):
 		await autoChoose() ## Executa jogada automática
 		rounds += 1
 		
-		await get_tree().create_timer(0.8).timeout ## Espera um tempo antes de reiniciar
+		await get_tree().create_timer(0.5).timeout ## Espera um tempo antes de reiniciar
 
 
 ## Escolher as cartas automaticamente
@@ -187,8 +188,8 @@ func autoChoose():
 		
 		control2Cards += 1
 		chooseCard(deck[i])
-		
-		await get_tree().create_timer(0.5).timeout
+		rand_time = randf_range(0.6, 1.6)
+		await get_tree().create_timer(rand_time).timeout
 		
 		if(scoreControl == goal):
 			scoreControl = 0
@@ -199,10 +200,6 @@ func autoChoose():
 			used.append(i)
 			used.append(i-1)
 			memory.erase(value)
-			
-			
-		await get_tree().create_timer(0.5).timeout
-		
 		
 		if(scoreControl == goal):
 			scoreControl = 0
@@ -214,15 +211,12 @@ func autoChoose():
 			var j = memory[value]  ## Atualizar se existir valor no dicionário
 			control2Cards += 1
 			chooseCard(deck[j])
-			
-			
-			await get_tree().create_timer(0.5).timeout
-			
+			rand_time = randf_range(0.6, 1.6)
+			await get_tree().create_timer(rand_time).timeout
 			
 			if(scoreControl == goal):
 				scoreControl = 0
 				return
-			
 			matchCards = false
 			
 			if(turnOver == true && control2Cards % 2 != 0):
@@ -230,11 +224,9 @@ func autoChoose():
 				control2Cards += 1
 				chooseCard(deck[i])
 				matchCards = false
+				rand_time = randf_range(0.6, 1.6)
+				await get_tree().create_timer(rand_time).timeout
 				
-				await get_tree().create_timer(0.5).timeout
-				
-				
-			
 			if(scoreControl == goal):
 					scoreControl = 0
 					return
@@ -250,7 +242,6 @@ func autoChoose():
 			used.append(i)
 			used.append(j)
 			memory.erase(value)
-			
 		
 		else:
 			## Salvar carta na memória
@@ -259,10 +250,9 @@ func autoChoose():
 			if(matchCards == true && control2Cards % 2 == 0 && control2Cards > 0):
 				memory.erase(value)
 				matchCards = false
-				
 		
 		i += 1
-		await get_tree().create_timer(0.5).timeout
+		await get_tree().create_timer(0.45).timeout
 		
 
 
@@ -298,8 +288,6 @@ func chooseCard(c):
 		## Tempo que o jogador levou para clicar nas cartas
 		elapsedTime = Time.get_ticks_msec() - timeStart
 		reaction.append(elapsedTime)
-		
-		print(reaction)
 
 ## Checar se as cartas são iguais
 func checkCards():
@@ -345,6 +333,7 @@ func matchCardsAndScore():
 		#Game.add_child(winScreen)
 		#winScreen.setupWinScreen()
 		saveData(str(reaction))
+		print(reaction)
 		reaction.clear()
 		hudCount.append(score)
 		hudCount.append(timerSec)
@@ -379,6 +368,7 @@ func resetGame():
 func exitGame():
 	## Salvar caso o jogador feche o jogo
 	saveData(str(reaction))
+	print(reaction)
 	reaction.clear()
 	hudCount.append(score)
 	hudCount.append(timerSec)
@@ -388,27 +378,42 @@ func exitGame():
 	hudCount.clear()
 	get_tree().quit()
 
-## Ainda vendo:
-#func loadData():
-	## CAMINHO:
-	## C:\Users\user_name\AppData\Roaming\Godot\app_userdata\Memory Game\Dados.txt
-	
-	#var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
-	#var content = file.get_as_text()
-	#return content
-#
-#func loadData2():
-	#var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ)
-	#var content2 = file2.get_as_text()
-	#return content2
+## Carregar Dados
+func loadData():
+	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
+	var content = file.get_as_text()
+	return content
+
+func loadData2():
+	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ)
+	var content2 = file2.get_as_text()
+	return content2
 
 ## Salvar Dados
 func saveData(content):
-	var file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
-	file.seek_end() ## Move o cursor para o final do arquivo
-	file.store_line(str(content)) ## Armazenar string com quebra de linha
+	var file
+	
+	if(FileAccess.file_exists("user://Dados.txt")): ## Verifica se o arquivo existe
+		file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
+		file.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file =  FileAccess.open("user://Dados.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	
+	if(file):
+		file.store_line(str(content)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados.txt")
 	
 func saveData2(content2):
-	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
-	file2.seek_end()
-	file2.store_line(str(content2))
+	var file2
+	
+	if(FileAccess.file_exists("user://Dados2.txt")): ## Verifica se o arquivo existe
+		file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
+		file2.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file2 =  FileAccess.open("user://Dados2.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	
+	if(file2):
+		file2.store_line(str(content2)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados2.txt")
