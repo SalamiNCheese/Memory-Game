@@ -45,6 +45,8 @@ var is_busy = false
 
 ## --------------------MAIN---------------------
 func _ready():
+
+	
 	fillDeck()
 	randomize()
 	deck.shuffle()
@@ -275,6 +277,10 @@ func matchCardsAndScore():
 		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 		print(hudCount)
 		hudCount.clear()
+		OS.shell_open(ProjectSettings.globalize_path("user://"))
+		#save_data(str(reaction))
+		#reaction.clear()
+		#save_hud_data(score, timerSec, moves)
 		resetGame()
 
 ## Contar o Tempo
@@ -309,29 +315,99 @@ func exitGame():
 	saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 	print(hudCount)
 	hudCount.clear()
+	OS.shell_open(ProjectSettings.globalize_path("user://"))
+	#save_data(str(reaction))
+	#reaction.clear()
+	#save_hud_data(score, timerSec, moves)
 	get_tree().quit()
 
 ## Ainda vendo:
-#func loadData():
-	## CAMINHO:
-	## C:\Users\user_name\AppData\Roaming\Godot\app_userdata\Memory Game\Dados.txt
+func loadData():
+	# CAMINHO:
+	# C:\Users\user_name\AppData\Roaming\Godot\app_userdata\Memory Game\Dados.txt
 	
-	#var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
-	#var content = file.get_as_text()
-	#return content
-#
-#func loadData2():
-	#var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ)
-	#var content2 = file2.get_as_text()
-	#return content2
+	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
+	var content = file.get_as_text()
+	return content
+
+func loadData2():
+	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ)
+	var content2 = file2.get_as_text()
+	return content2
 
 ## Salvar Dados
 func saveData(content):
 	var file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
+	#var path = "user://Memory Game"
+	#var dirAccess =  DirAccess.open("user://")
+	#if(dirAccess == null):
+		#print("DirAccess is null")
+	#else:
+		#dirAccess.make_dir(path)
 	file.seek_end() ## Move o cursor para o final do arquivo
 	file.store_line(str(content)) ## Armazenar string com quebra de linha
 	
 func saveData2(content2):
 	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
+	#var path = "user://Memory Game"
+	#var dirAccess =  DirAccess.open("user://")
+	#if(dirAccess == null):
+		#print("DirAccess is null")
+	#else:
+		#dirAccess.make_dir(path)
 	file2.seek_end()
 	file2.store_line(str(content2))
+
+
+#func get_desktop_path():
+	#var os_name = OS.get_name()
+	#var desktop_path = ""
+	#
+	#if(os_name == "Windows"):
+		#desktop_path = OS.get_environment("USERPROFILE") + "/Desktop"
+		#
+	#elif(os_name == "Linux"):
+		#desktop_path = "/home/%s/Desktop" % OS.get_environment("USER")
+		#if(not DirAccess.dir_exists_absolute(desktop_path)):
+			#desktop_path = "/home/%s/Área de Trabalho" % OS.get_environment("USER")
+	#
+	#elif(os_name == "macOS"):
+		#desktop_path = "/Users/%s/Desktop" % OS.get_environment("USER")
+	#
+	#else:
+		#print("Sistem Operacional não suportado para Area de Trabalho")
+		#desktop_path = "user://"
+	#
+	#return desktop_path
+#
+#func save_data(data, filename = "Dados1.txt"):
+	#var path = get_desktop_path() + "/" + filename
+	#var path2 =  "user://Dados1.txt"
+	#var path3 = "user://Dados2.txt"
+#
+	#
+#
+	#var dirAccess = DirAccess.open("user://")
+	#if dirAccess == null:
+		#print("DirAccess is null");
+	#else:
+		#dirAccess.make_dir(path)
+		#
+	#var file = FileAccess.open(path + filename, FileAccess.READ_WRITE)
+	#if file == null:
+		#print("cannot open file to save")
+#
+	#
+#
+	#
+	#if(file):
+		#file.seek_end() ## Move o cursor para o final do arquivo
+		#file.store_line(data)
+		#print("Salvo: ", path)
+		#
+	#else:
+		#push_error("Erro ao salvar em: " + path)
+	#
+#func save_hud_data(scoreS, timerS, movesS, filename = "Dados2.txt"):
+	#var hud_line = "[%s,%s,%s]" % [scoreS, timerS, movesS]
+	#save_data(hud_line, filename)
