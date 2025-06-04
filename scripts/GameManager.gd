@@ -45,8 +45,6 @@ var is_busy = false
 
 ## --------------------MAIN---------------------
 func _ready():
-
-	
 	fillDeck()
 	randomize()
 	deck.shuffle()
@@ -278,9 +276,6 @@ func matchCardsAndScore():
 		print(hudCount)
 		hudCount.clear()
 		OS.shell_open(ProjectSettings.globalize_path("user://"))
-		#save_data(str(reaction))
-		#reaction.clear()
-		#save_hud_data(score, timerSec, moves)
 		resetGame()
 
 ## Contar o Tempo
@@ -316,16 +311,10 @@ func exitGame():
 	print(hudCount)
 	hudCount.clear()
 	OS.shell_open(ProjectSettings.globalize_path("user://"))
-	#save_data(str(reaction))
-	#reaction.clear()
-	#save_hud_data(score, timerSec, moves)
 	get_tree().quit()
 
-## Ainda vendo:
+## Carregar Dados
 func loadData():
-	# CAMINHO:
-	# C:\Users\user_name\AppData\Roaming\Godot\app_userdata\Memory Game\Dados.txt
-	
 	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
 	var content = file.get_as_text()
 	return content
@@ -337,26 +326,33 @@ func loadData2():
 
 ## Salvar Dados
 func saveData(content):
-	var file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
-	#var path = "user://Memory Game"
-	#var dirAccess =  DirAccess.open("user://")
-	#if(dirAccess == null):
-		#print("DirAccess is null")
-	#else:
-		#dirAccess.make_dir(path)
-	file.seek_end() ## Move o cursor para o final do arquivo
-	file.store_line(str(content)) ## Armazenar string com quebra de linha
+	var file
 	
+	if(FileAccess.file_exists("user://Dados.txt")): ## Verifica se o arquivo existe
+		file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
+		file.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file =  FileAccess.open("user://Dados.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	
+	if(file):
+		file.store_line(str(content)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados.txt")
+
+
 func saveData2(content2):
-	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
-	#var path = "user://Memory Game"
-	#var dirAccess =  DirAccess.open("user://")
-	#if(dirAccess == null):
-		#print("DirAccess is null")
-	#else:
-		#dirAccess.make_dir(path)
-	file2.seek_end()
-	file2.store_line(str(content2))
+	var file2
+	
+	if(FileAccess.file_exists("user://Dados2.txt")): ## Verifica se o arquivo existe
+		file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
+		file2.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file2 =  FileAccess.open("user://Dados2.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	
+	if(file2):
+		file2.store_line(str(content2)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados2.txt")
 
 
 #func get_desktop_path():
@@ -379,35 +375,3 @@ func saveData2(content2):
 		#desktop_path = "user://"
 	#
 	#return desktop_path
-#
-#func save_data(data, filename = "Dados1.txt"):
-	#var path = get_desktop_path() + "/" + filename
-	#var path2 =  "user://Dados1.txt"
-	#var path3 = "user://Dados2.txt"
-#
-	#
-#
-	#var dirAccess = DirAccess.open("user://")
-	#if dirAccess == null:
-		#print("DirAccess is null");
-	#else:
-		#dirAccess.make_dir(path)
-		#
-	#var file = FileAccess.open(path + filename, FileAccess.READ_WRITE)
-	#if file == null:
-		#print("cannot open file to save")
-#
-	#
-#
-	#
-	#if(file):
-		#file.seek_end() ## Move o cursor para o final do arquivo
-		#file.store_line(data)
-		#print("Salvo: ", path)
-		#
-	#else:
-		#push_error("Erro ao salvar em: " + path)
-	#
-#func save_hud_data(scoreS, timerS, movesS, filename = "Dados2.txt"):
-	#var hud_line = "[%s,%s,%s]" % [scoreS, timerS, movesS]
-	#save_data(hud_line, filename)
