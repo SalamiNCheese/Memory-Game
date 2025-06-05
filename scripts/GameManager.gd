@@ -41,8 +41,6 @@ var reaction = Array()
 
 ## Se igual a 0, espelhado. Se igual 1, seguidas
 var perfect = 0
-var times = 5
-var is_busy = false
 var changeShow
 
 ## --------------------MAIN---------------------
@@ -53,14 +51,8 @@ func _ready():
 	dealDeck()
 	setupTimers()
 	setupHUD()
-	await revealCards()
-	## Normal Play
 	var firstScreen = popUp.instantiate()
 	Game.add_child(firstScreen)
-	## AutoPlay
-	#await get_tree().process_frame ## Esperar renderização
-	#await get_tree().create_timer(0.5).timeout ## Esperar meio segundo
-	#autoLoop(times)
 
 ## -----------------MÉTODOS------------------
 
@@ -74,6 +66,7 @@ func setupHUD():
 	exitButton = Game.get_node('HUD/Panel2/SectionExit/ButtonExit')
 	pauseButton = Game.get_node("HUD/Panel/Sections/SectionButtons/ButtonPause")
 	
+	## Chamada de função ao apertar um botão específico
 	resetButton.connect("pressed", Callable(self, "resetGame"))
 	exitButton.connect("pressed", Callable(self, "exitGame"))
 	
@@ -132,7 +125,6 @@ func dealDeck():
 		c += 1
 
 func revealCards():
-	is_busy = true
 	pauseButton.can_pause = false
 	resetButton.set_disabled(true)
 	exitButton.set_disabled(true)
@@ -146,85 +138,14 @@ func revealCards():
 	for c in deck:
 		c.flip()
 	
-	is_busy = false
 	resetButton.set_disabled(false)
 	exitButton.set_disabled(false)
 	pauseButton.can_pause = true
 	pauseButton.set_disabled(false)
-	
-## Funcionar o jogo várias vezes seguidas
-func autoLoop(times):
-	var rounds = 0
-	
-	## Número de rodadas
-	while(rounds < times):
-		print(">>> Rodada ", rounds + 1)
-		if(score == goal):
-			## Resetar a rodada manualmente (como no resetGame)
-			for c in range(deck.size()):
-				deck[c].queue_free()
-			deck.clear()
-			score = 0
-			timerSec = 0
-			moves = 0
-			scoreLabel.text = str(score)
-			timerSecLabel.text = str(timerSec)
-			movesLabel.text = str(moves)
-			fillDeck()
-			randomize()
-			deck.shuffle()
-			dealDeck()
-		
-		await get_tree().process_frame ## Espera um frame antes de começar
-		await autoChoose() ## Executa jogada automática
-		rounds += 1
-		
-		await get_tree().create_timer(1.0).timeout ## Espera um tempo antes de reiniciar
-
-
-## Escolher as cartas automaticamente
-func autoChoose():
-	var memory = Dictionary() ## Dicionário: valor -> índice
-	var used = Array()  ## Índices já combinados
-	var i = 0
-
-	while(i < deck.size()): ## Percorrer as cartas do baralho
-		if(i in used): ## Se a carta já fez par, pula para a próxima
-			i += 1
-			continue
-		
-		chooseCard(deck[i])
-		await get_tree().create_timer(0.2).timeout
-		
-		var value = deck[i].value ## Valor da carta
-		
-		if(memory.has(value) && memory[value] not in used): ## Verifica se já existe esse valor no dicionário
-			var j = memory[value]  ## Atualizar se existir valor no dicionário
-			chooseCard(deck[j])
-			await get_tree().create_timer(1.0).timeout
-			if(j in used): ## Se a carta já fez par, pula para a próxima
-				i += 1
-				continue
-	
-			## Se der Match, marcar como usado
-			used.append(i)
-			used.append(j)
-			memory.erase(value)
-		
-		else:
-			## Salvar carta na memória
-			memory[value] = i
-		
-		i += 1
-		await get_tree().create_timer(0.3).timeout
 
 
 ## Ponteiro para carta
 func chooseCard(c):
-	## Impedir de escolher (quando não se deve) quando estiver no autoChoose
-	if(is_busy == true):
-		return
-	
 	## Impedir de escolher quando é nulo
 	if(c == null || !is_instance_valid(c)):
 		return
@@ -244,9 +165,8 @@ func chooseCard(c):
 		moves += 1 ## Pares Virados
 		movesLabel.text = str(moves)
 		resetButton.set_disabled(true) ## Impedir que o jogador resete enquanto está comparando
-		is_busy = true ## Está ocupado
 		checkCards()
-		
+
 		## Tempo que o jogador levou para clicar nas cartas
 		elapsedTime = Time.get_ticks_msec() - timeStart
 		reaction.append(elapsedTime)
@@ -269,7 +189,6 @@ func turnOverCards():
 	card1 = null
 	card2 = null
 	resetButton.set_disabled(false) ## Permitir que o jogador clique no botão de Reset
-	is_busy = false ## Não está mais ocupado (autoChoose pode voltar a escolher cartas)
 
 ## Aplicar filtro e contar pontuação (Jogador acertou o par)
 func matchCardsAndScore():
@@ -282,7 +201,6 @@ func matchCardsAndScore():
 	card1 = null
 	card2 = null
 	resetButton.set_disabled(false) ## Permitir que o jogador clique no botão de Reset
-	is_busy = false ## Não está mais ocupado (autoChoose pode voltar a escolher cartas)
 	
 	## Quando vencer o jogo
 	if(score == goal):
@@ -380,25 +298,3 @@ func saveData2(content2):
 		file2.store_line(str(content2)) ## Armazenar string com quebra de linha
 	else:
 		push_error("Erro ao abrir ou criar arquivo Dados2.txt")
-
-
-#func get_desktop_path():
-	#var os_name = OS.get_name()
-	#var desktop_path = ""
-	#
-	#if(os_name == "Windows"):
-		#desktop_path = OS.get_environment("USERPROFILE") + "/Desktop"
-		#
-	#elif(os_name == "Linux"):
-		#desktop_path = "/home/%s/Desktop" % OS.get_environment("USER")
-		#if(not DirAccess.dir_exists_absolute(desktop_path)):
-			#desktop_path = "/home/%s/Área de Trabalho" % OS.get_environment("USER")
-	#
-	#elif(os_name == "macOS"):
-		#desktop_path = "/Users/%s/Desktop" % OS.get_environment("USER")
-	#
-	#else:
-		#print("Sistem Operacional não suportado para Area de Trabalho")
-		#desktop_path = "user://"
-	#
-	#return desktop_path
