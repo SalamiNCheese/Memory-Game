@@ -41,7 +41,8 @@ var reaction = Array()
 
 ## Variáveis de Controle
 var perfect = 0 ## Se igual a 0, espelhado. Se igual 1, seguidas
-var times = 6
+var typeOfChoose = 1 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
+var times = 8
 var is_busy = false
 var turnOver = false
 var matchCards = false
@@ -161,10 +162,56 @@ func autoLoop(t):
 		scoreControl = 0
 		matchCards = false
 		turnOver = false
-		await autoChoose() ## Executa jogada automática
+		if(typeOfChoose == 0):
+			await autoChoose() ## Executa jogada automática
+		else:
+			await autoChooseKnow() ## Outro modo de jogada automática
 		rounds += 1
 		
 		await get_tree().create_timer(0.5).timeout ## Espera um tempo antes de reiniciar
+
+## -----------------------------------------
+
+func autoChooseKnow():
+	var memory = Dictionary() ## Dicionário: valor -> índice
+	var used = Array()  ## Índices já combinados
+	var i = 0
+
+	while(i < deck.size()): ## Percorrer as cartas do baralho
+		if(i in used): ## Se a carta já fez par, pula para a próxima
+			i += 1
+			continue
+		
+		var value = deck[i].value ## Valor da carta
+		
+		if(memory.has(value)): ## Verifica se já existe esse valor no dicionário
+			var j = memory[value]  ## Atualizar se existir valor no dicionário
+			if(j in used): ## Se a carta já fez par, pula para a próxima
+				i += 1
+				continue
+			
+			## Virar ambas as cartas
+			chooseCard(deck[j])
+			rand_time = randf_range(0.6, 1.6)
+			await get_tree().create_timer(rand_time).timeout
+			chooseCard(deck[i])
+			rand_time = randf_range(0.6, 1.6)
+			await get_tree().create_timer(rand_time).timeout
+			
+			## Se der Match, marcar como usado
+			used.append(i)
+			used.append(j)
+			memory.erase(value)
+		
+		else:
+			## Salvar carta na memória
+			memory[value] = i
+		
+		i += 1
+		await get_tree().create_timer(0.5).timeout
+
+
+## -----------------------------------------------
 
 
 ## Escolher as cartas automaticamente
@@ -253,7 +300,6 @@ func autoChoose():
 		
 		i += 1
 		await get_tree().create_timer(0.45).timeout
-		
 
 
 
