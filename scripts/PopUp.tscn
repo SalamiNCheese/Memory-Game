@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://dva7q78ka8a61"]
+[gd_scene load_steps=7 format=3 uid="uid://dva7q78ka8a61"]
 
 [ext_resource type="Theme" uid="uid://d4avfb4i41ioh" path="res://themeHUD1.tres" id="1_d4l3m"]
 [ext_resource type="Script" uid="uid://c8ddseybfrv02" path="res://scripts/PopUp.gd" id="1_ldvvv"]
 [ext_resource type="FontFile" uid="uid://44xawmlk2cgb" path="res://assets/fonts/Nunito-Bold.ttf" id="3_hx1qj"]
 [ext_resource type="Texture2D" uid="uid://b8s6w4amsmbg1" path="res://assets/ui/title-memory.png" id="3_yk3f5"]
+[ext_resource type="Script" uid="uid://butlxp52kr30w" path="res://scripts/RevealOption.gd" id="6_eku5s"]
+[ext_resource type="Texture2D" uid="uid://b84jafopbi2ny" path="res://assets/ui/ButtonNotActive.png" id="6_hhwmc"]
 
 [node name="PopUp" type="Control"]
 process_mode = 3
@@ -44,6 +46,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="TextureRect" type="TextureRect" parent="CenterContainer/Panel/VBoxContainer"]
 layout_mode = 2
@@ -67,7 +70,7 @@ custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hover_color = Color(2.96004e-06, 0.701049, 0, 1)
-theme_override_colors/font_color = Color(0.187176, 0.187176, 0.187176, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("3_hx1qj")
 theme_override_font_sizes/font_size = 50
@@ -75,3 +78,23 @@ text = "COMEÇAR"
 flat = true
 text_overrun_behavior = 2
 icon_alignment = 1
+
+[node name="RevealOption" type="Button" parent="CenterContainer/Panel/VBoxContainer"]
+process_mode = 3
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("3_hx1qj")
+theme_override_font_sizes/font_size = 50
+toggle_mode = true
+text = "   Revelar Cartas:"
+icon = ExtResource("6_hhwmc")
+flat = true
+alignment = 0
+text_overrun_behavior = 2
+icon_alignment = 1
+script = ExtResource("6_eku5s")

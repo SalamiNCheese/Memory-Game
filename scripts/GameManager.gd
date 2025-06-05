@@ -41,7 +41,7 @@ var reaction = Array()
 
 ## Se igual a 0, espelhado. Se igual 1, seguidas
 var perfect = 0
-var changeShow
+var reveal_button = false
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -125,23 +125,28 @@ func dealDeck():
 		c += 1
 
 func revealCards():
-	pauseButton.can_pause = false
-	resetButton.set_disabled(true)
-	exitButton.set_disabled(true)
-	pauseButton.set_disabled(true)
+	if(reveal_button == false):
+		return
+	else:
+		pauseButton.can_pause = false
+		resetButton.set_disabled(true)
+		exitButton.set_disabled(true)
+		pauseButton.set_disabled(true)
+		
+		for c in deck:
+			c.flip()
+		
+		await get_tree().create_timer(2.0).timeout
+		
+		for c in deck:
+			c.flip()
+		
+		resetButton.set_disabled(false)
+		exitButton.set_disabled(false)
+		pauseButton.can_pause = true
+		pauseButton.set_disabled(false)
 	
-	for c in deck:
-		c.flip()
 	
-	await get_tree().create_timer(2.0).timeout
-	
-	for c in deck:
-		c.flip()
-	
-	resetButton.set_disabled(false)
-	exitButton.set_disabled(false)
-	pauseButton.can_pause = true
-	pauseButton.set_disabled(false)
 
 
 ## Ponteiro para carta
