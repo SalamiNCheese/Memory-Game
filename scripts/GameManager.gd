@@ -39,9 +39,11 @@ var timeStart = 0
 var elapsedTime = 0
 var reaction = Array()
 
+var parMovesStatus = Dictionary()
+
 ## Variáveis de Controle
 var perfect = 0 ## Se igual a 0, espelhado. Se igual 1, seguidas
-var typeOfChoose = 1 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
+var typeOfChoose = 0 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
 var times = 8
 var is_busy = false
 var turnOver = false
@@ -350,6 +352,7 @@ func checkCards():
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
 func turnOverCards():
+	parMovesStatus[moves] = 0
 	card1.flip()
 	card2.flip()
 	card1.set_disabled(false) ## Permitir que o jogador clique na carta novamente
@@ -362,6 +365,7 @@ func turnOverCards():
 ## Aplicar filtro e contar pontuação (Jogador acertou o par)
 func matchCardsAndScore():
 	score += 1
+	parMovesStatus[moves] = 1
 	scoreLabel.text = str(score)
 	if(is_instance_valid(card1)):
 		card1.set_modulate(Color(0.6, 0.6, 0.6, 0.5))
@@ -387,6 +391,9 @@ func matchCardsAndScore():
 		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 		print(hudCount)
 		hudCount.clear()
+		saveData3(str(parMovesStatus))
+		print(parMovesStatus)
+		parMovesStatus.clear()
 		resetGame()
 
 ## Contar o Tempo
@@ -422,6 +429,9 @@ func exitGame():
 	saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 	print(hudCount)
 	hudCount.clear()
+	saveData3(str(parMovesStatus))
+	print(parMovesStatus)
+	parMovesStatus.clear()
 	get_tree().quit()
 
 ## Carregar Dados
@@ -463,3 +473,17 @@ func saveData2(content2):
 		file2.store_line(str(content2)) ## Armazenar string com quebra de linha
 	else:
 		push_error("Erro ao abrir ou criar arquivo Dados2.txt")
+	
+func saveData3(content3):
+	var file3
+	
+	if(FileAccess.file_exists("user://Dados3.txt")): ## Verifica se o arquivo existe
+		file3 = FileAccess.open("user://Dados3.txt", FileAccess.READ_WRITE)
+		file3.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file3 =  FileAccess.open("user://Dados3.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+	if(file3):
+		file3.store_line(str(content3)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados3.txt")
