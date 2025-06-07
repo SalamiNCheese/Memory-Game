@@ -27,7 +27,7 @@ var moves = 0
 
 var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
 ##-------------------------------------------
-var goal = 3 ## Para teste, mudar número depois <---------------------------------------------------------
+var goal = 10 ## Para teste, mudar número depois <---------------------------------------------------------
 ##-------------------------------------------
 
 var resetButton
