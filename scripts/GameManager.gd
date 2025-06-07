@@ -39,9 +39,12 @@ var timeStart = 0
 var elapsedTime = 0
 var reaction = Array()
 
+
 ## Se igual a 0, espelhado. Se igual 1, seguidas
 var perfect = 0
 var reveal_button = false
+var status ## 0 igual Erro, 1 igual Acerto
+var parMovesStatus = Dictionary()
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -187,6 +190,7 @@ func checkCards():
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
 func turnOverCards():
+	parMovesStatus[moves] = 0
 	card1.flip()
 	card2.flip()
 	card1.set_disabled(false) ## Permitir que o jogador clique na carta novamente
@@ -198,6 +202,7 @@ func turnOverCards():
 ## Aplicar filtro e contar pontuação (Jogador acertou o par)
 func matchCardsAndScore():
 	score += 1
+	parMovesStatus[moves] = 1
 	scoreLabel.text = str(score)
 	if(is_instance_valid(card1)):
 		card1.set_modulate(Color(0.6, 0.6, 0.6, 0.5))
@@ -222,6 +227,9 @@ func matchCardsAndScore():
 		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 		print(hudCount)
 		hudCount.clear()
+		saveData3(str(parMovesStatus))
+		print(parMovesStatus)
+		parMovesStatus.clear()
 		resetGame()
 
 ## Contar o Tempo
@@ -260,6 +268,9 @@ func exitGame():
 	saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
 	print(hudCount)
 	hudCount.clear()
+	saveData3(str(parMovesStatus))
+	print(parMovesStatus)
+	parMovesStatus.clear()
 	OS.shell_open(ProjectSettings.globalize_path("user://"))
 	get_tree().quit()
 
@@ -274,32 +285,90 @@ func loadData2():
 	var content2 = file2.get_as_text()
 	return content2
 
+func loadData3():
+	var file3 = FileAccess.open("user://Dados3.txt", FileAccess.READ)
+	var content3 = file3.get_as_text()
+	return content3
+
 ## Salvar Dados
 func saveData(content):
 	var file
 	
-	if(FileAccess.file_exists("user://Dados.txt")): ## Verifica se o arquivo existe
-		file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
-		file.seek_end() ## Move o cursor para o final do arquivo
-	else: ## Se o arquivo não existir
-		file =  FileAccess.open("user://Dados.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	if(reveal_button == false):
+		if(FileAccess.file_exists("user://Dados.txt")): ## Verifica se o arquivo existe
+			file = FileAccess.open("user://Dados.txt", FileAccess.READ_WRITE)
+			file.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file =  FileAccess.open("user://Dados.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file):
+			file.store_line(str(content)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados.txt")
 	
-	if(file):
-		file.store_line(str(content)) ## Armazenar string com quebra de linha
 	else:
-		push_error("Erro ao abrir ou criar arquivo Dados.txt")
+		if(FileAccess.file_exists("user://Dados_Reveal_Mode.txt")): ## Verifica se o arquivo existe
+			file = FileAccess.open("user://Dados_Reveal_Mode.txt", FileAccess.READ_WRITE)
+			file.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file =  FileAccess.open("user://Dados_Reveal_Mode.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file):
+			file.store_line(str(content)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados_Reveal_Mode.txt")
 
 
 func saveData2(content2):
 	var file2
 	
-	if(FileAccess.file_exists("user://Dados2.txt")): ## Verifica se o arquivo existe
-		file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
-		file2.seek_end() ## Move o cursor para o final do arquivo
-	else: ## Se o arquivo não existir
-		file2 =  FileAccess.open("user://Dados2.txt", FileAccess.WRITE) ## Cria um novo arquivo
+	if(reveal_button == false):
+		if(FileAccess.file_exists("user://Dados2.txt")): ## Verifica se o arquivo existe
+			file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ_WRITE)
+			file2.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file2 =  FileAccess.open("user://Dados2.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file2):
+			file2.store_line(str(content2)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados2.txt")
 	
-	if(file2):
-		file2.store_line(str(content2)) ## Armazenar string com quebra de linha
 	else:
-		push_error("Erro ao abrir ou criar arquivo Dados2.txt")
+		if(FileAccess.file_exists("user://Dados2_Reveal_Mode.txt")): ## Verifica se o arquivo existe
+			file2 = FileAccess.open("user://Dados2_Reveal_Mode.txt", FileAccess.READ_WRITE)
+			file2.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file2 =  FileAccess.open("user://Dados2_Reveal_Mode.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file2):
+			file2.store_line(str(content2)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados2_Reveal_Mode.txt")
+	
+func saveData3(content3):
+	var file3
+	
+	if(reveal_button == false):
+		if(FileAccess.file_exists("user://Dados3.txt")): ## Verifica se o arquivo existe
+			file3 = FileAccess.open("user://Dados3.txt", FileAccess.READ_WRITE)
+			file3.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file3 =  FileAccess.open("user://Dados3.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file3):
+			file3.store_line(str(content3)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados3.txt")
+		
+	else:
+		if(FileAccess.file_exists("user://Dados3_Reveal_Mode.txt")): ## Verifica se o arquivo existe
+			file3 = FileAccess.open("user://Dados3_Reveal_Mode.txt", FileAccess.READ_WRITE)
+			file3.seek_end() ## Move o cursor para o final do arquivo
+		else: ## Se o arquivo não existir
+			file3 =  FileAccess.open("user://Dados3_Reveal_Mode.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+		if(file3):
+			file3.store_line(str(content3)) ## Armazenar string com quebra de linha
+		else:
+			push_error("Erro ao abrir ou criar arquivo Dados3_Reveal_Mode.txt")
