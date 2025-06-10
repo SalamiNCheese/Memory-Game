@@ -43,14 +43,15 @@ var parMovesStatus = Dictionary()
 
 ## Variáveis de Controle
 var perfect = 0 ## Se igual a 0, espelhado. Se igual 1, seguidas
-var typeOfChoose = 0 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
-var times = 8
+var typeOfChoose = 2 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
+var times = 100
 var is_busy = false
 var turnOver = false
 var matchCards = false
 var autoPlay = false
 var control2Cards = 0
 var rand_time
+var rand_choose
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -166,8 +167,10 @@ func autoLoop(t):
 		turnOver = false
 		if(typeOfChoose == 0):
 			await autoChoose() ## Executa jogada automática
+		elif(typeOfChoose == 1):
+			await autoChooseKnow() ## Executa jogada sabendo
 		else:
-			await autoChooseKnow() ## Outro modo de jogada automática
+			await autoChooseRandom() ## Executa jogada aleatória
 		rounds += 1
 		
 		await get_tree().create_timer(0.5).timeout ## Espera um tempo antes de reiniciar
@@ -216,12 +219,55 @@ func autoChooseKnow():
 ## -----------------------------------------------
 
 
+func autoChooseRandom():
+	var available = [] ## Índices das cartas disponíveis (não usadas)
+	
+	for i in range(deck.size()):
+		available.append(i)
+
+	autoPlay = true
+	control2Cards = 0
+
+	while(available.size() >= 2):
+		while(is_busy):
+			await get_tree().process_frame
+
+		## Escolhe duas cartas diferentes aleatórias
+		available.shuffle()
+		var i = available[0]
+		var j = available[1]
+		
+		control2Cards += 1
+		chooseCard(deck[i])
+		await get_tree().create_timer(randf_range(0.4, 0.7)).timeout
+		
+		control2Cards += 1
+		chooseCard(deck[j])
+		await get_tree().create_timer(randf_range(0.4, 0.7)).timeout
+
+		
+		
+		## Verifica se formaram par
+		if(matchCards):
+			## Remove ambos da lista de disponíveis
+			available.erase(i)
+			available.erase(j)
+			matchCards = false
+	
+		else:
+			pass ## Se não foi par, mantém disponíveis
+
+		if(scoreControl == goal):
+			scoreControl = 0
+			return
+
+
+## -------------------------------------------------
 ## Escolher as cartas automaticamente
 func autoChoose():
 	var memory = Dictionary() ## Dicionário: valor ; posição
 	var used = Array()  ## Índices já combinados
 	var i = 0
-	var control = 0
 	var value = deck[i].value ## Valor da carta
 	autoPlay = true
 	control2Cards = 0
@@ -301,7 +347,7 @@ func autoChoose():
 				matchCards = false
 		
 		i += 1
-		await get_tree().create_timer(0.45).timeout
+		await get_tree().create_timer(0.35).timeout
 
 
 
@@ -347,7 +393,7 @@ func checkCards():
 	else:
 		if(autoPlay == true && control2Cards % 2 == 0):
 			turnOver = true
-		flipTimer.start(0.4)
+		flipTimer.start(0.3)
 
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
@@ -382,16 +428,16 @@ func matchCardsAndScore():
 		#var winScreen = popUp.instantiate()
 		#Game.add_child(winScreen)
 		#winScreen.setupWinScreen()
-		saveData(str(reaction))
+		saveData(str(reaction)+",")
 		print(reaction)
 		reaction.clear()
 		hudCount.append(score)
 		hudCount.append(timerSec)
 		hudCount.append(moves)
-		saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
+		saveData2(str(hudCount)+",") ## 1º= Score, 2º = Timer, 3º = Moves
 		print(hudCount)
 		hudCount.clear()
-		saveData3(str(parMovesStatus))
+		saveData3(str(parMovesStatus)+",")
 		print(parMovesStatus)
 		parMovesStatus.clear()
 		resetGame()
@@ -420,16 +466,16 @@ func resetGame():
 ## Sair do jogo
 func exitGame():
 	## Salvar caso o jogador feche o jogo
-	saveData(str(reaction))
+	saveData(str(reaction)+",")
 	print(reaction)
 	reaction.clear()
 	hudCount.append(score)
 	hudCount.append(timerSec)
 	hudCount.append(moves)
-	saveData2(str(hudCount)) ## 1º= Score, 2º = Timer, 3º = Moves
+	saveData2(str(hudCount)+",") ## 1º= Score, 2º = Timer, 3º = Moves
 	print(hudCount)
 	hudCount.clear()
-	saveData3(str(parMovesStatus))
+	saveData3(str(parMovesStatus)+",")
 	print(parMovesStatus)
 	parMovesStatus.clear()
 	get_tree().quit()
