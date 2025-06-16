@@ -39,11 +39,19 @@ var timeStart = 0
 var elapsedTime = 0
 var reaction = Array()
 
+var timeStartPair = 0
+var movesProgress = 0
+var timeTotalPair = Dictionary()
 var parMovesStatus = Dictionary()
+var movesEachPair = Dictionary()
+var timeEachPair = Dictionary()
+var cardsLeft = 20
+var movesPair = 0
+
 
 ## Variáveis de Controle
 var perfect = 0 ## Se igual a 0, espelhado. Se igual 1, seguidas
-var typeOfChoose = 2 ## Se igual a 0, aleatório. Se igual a 1, algoritmo sabe as cartas
+var typeOfChoose = 2 ## Se igual a 0, semi-aleatório. Se igual a 1, algoritmo sabe as cartas. Se igual a 2, totalmente aleátorio
 var times = 100
 var is_busy = false
 var turnOver = false
@@ -52,6 +60,7 @@ var autoPlay = false
 var control2Cards = 0
 var rand_time
 var rand_choose
+var avg
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -162,6 +171,7 @@ func autoLoop(t):
 			dealDeck()
 		
 		await get_tree().process_frame ## Espera um frame antes de começar
+		timeStartPair = 0
 		scoreControl = 0
 		matchCards = false
 		turnOver = false
@@ -221,6 +231,13 @@ func autoChooseKnow():
 
 func autoChooseRandom():
 	var available = [] ## Índices das cartas disponíveis (não usadas)
+	movesEachPair = Dictionary()
+	timeEachPair = Dictionary()
+	cardsLeft = 20
+	movesPair = 0
+	timeStartPair = Time.get_ticks_msec()
+	movesProgress = 0
+	
 	
 	for i in range(deck.size()):
 		available.append(i)
@@ -231,7 +248,7 @@ func autoChooseRandom():
 	while(available.size() >= 2):
 		while(is_busy):
 			await get_tree().process_frame
-
+		
 		## Escolhe duas cartas diferentes aleatórias
 		available.shuffle()
 		var i = available[0]
@@ -245,19 +262,32 @@ func autoChooseRandom():
 		chooseCard(deck[j])
 		await get_tree().create_timer(randf_range(0.4, 0.7)).timeout
 
-		
-		
 		## Verifica se formaram par
 		if(matchCards):
 			## Remove ambos da lista de disponíveis
+			#timeEachPair[cardsLeft] = (Time.get_ticks_msec() - timeStartPair)/1000 ## Pegar tempo que demorou na jogada
+			#timeStartPair = Time.get_ticks_msec() ## Resetar tempo pra cada carta
+			#movesEachPair[cardsLeft] = movesPair + 1 ## Ver quantas jogadas foram feitas naquela carta
+			#movesPair = 0 ## Resetar jogadas por carta
+			#cardsLeft = cardsLeft - 2 ## Começa em 20 -> 18 -> 16...0
+			
 			available.erase(i)
 			available.erase(j)
 			matchCards = false
 	
-		else:
-			pass ## Se não foi par, mantém disponíveis
+		else: ## Se não foi par, mantém disponíveis
+			#movesPair += 1 ## Acrescentar jogadas 
+			pass
 
 		if(scoreControl == goal):
+			#var cardsL = 20
+			#while(cardsL > 0):
+				#
+				#cardsL = cardsL - 2
+			#saveData4("Tempo: " + str(timeEachPair)+",\n")
+			#saveData4("Jogadas: " + str(movesEachPair)+",\n\n")
+			#timeEachPair.clear()
+			#movesEachPair.clear()
 			scoreControl = 0
 			return
 
@@ -398,6 +428,9 @@ func checkCards():
 
 ## Virar a carta para baixo novamente (Jogador errou o par)
 func turnOverCards():
+	movesPair += 1 ## Acrescentar jogadas 
+	movesProgress += 1
+	
 	parMovesStatus[moves] = 0
 	card1.flip()
 	card2.flip()
@@ -410,6 +443,19 @@ func turnOverCards():
 
 ## Aplicar filtro e contar pontuação (Jogador acertou o par)
 func matchCardsAndScore():
+	timeEachPair[cardsLeft] = (Time.get_ticks_msec() - timeStartPair)/1000 ## Pegar tempo que demorou na jogada
+	timeStartPair = Time.get_ticks_msec() ## Resetar tempo pra cada carta
+	movesPair += 1 ## Jogada que acertou
+	movesEachPair[cardsLeft] = movesPair ## Ver quantas jogadas foram feitas naquela carta
+	movesProgress += 1
+	print("\nMoves Progress: ",movesProgress)
+	print("\nMoves Pair: ",movesPair)
+	print("\nMoves: ", moves)
+	movesProgress = 0
+	
+	#movesPair = 0 ## Resetar jogadas por carta
+	cardsLeft = cardsLeft - 2 ## Começa em 20 -> 18 -> 16...0
+	
 	score += 1
 	parMovesStatus[moves] = 1
 	scoreLabel.text = str(score)
@@ -440,6 +486,9 @@ func matchCardsAndScore():
 		saveData3(str(parMovesStatus)+",")
 		print(parMovesStatus)
 		parMovesStatus.clear()
+		saveData4(str(movesEachPair)+",") 
+		print(movesEachPair)
+		movesEachPair.clear()
 		resetGame()
 
 ## Contar o Tempo
@@ -533,3 +582,17 @@ func saveData3(content3):
 		file3.store_line(str(content3)) ## Armazenar string com quebra de linha
 	else:
 		push_error("Erro ao abrir ou criar arquivo Dados3.txt")
+	
+func saveData4(content4):
+	var file4
+	
+	if(FileAccess.file_exists("user://Dados4.txt")): ## Verifica se o arquivo existe
+		file4 = FileAccess.open("user://Dados4.txt", FileAccess.READ_WRITE)
+		file4.seek_end() ## Move o cursor para o final do arquivo
+	else: ## Se o arquivo não existir
+		file4 =  FileAccess.open("user://Dados4.txt", FileAccess.WRITE) ## Cria um novo arquivo
+		
+	if(file4):
+		file4.store_line(str(content4)) ## Armazenar string com quebra de linha
+	else:
+		push_error("Erro ao abrir ou criar arquivo Dados4.txt")
