@@ -26,9 +26,9 @@ var timerSec = 0
 var moves = 0
 
 var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
-##-------------------------------------------
-var goal = 10 ## Para teste, mudar número depois <---------------------------------------------------------
-##-------------------------------------------
+
+var goal = 10
+
 
 var resetButton
 var exitButton
@@ -43,7 +43,6 @@ var reaction = Array()
 ## Se igual a 0, espelhado. Se igual 1, seguidas
 var perfect = 0
 var reveal_button = false
-var status ## 0 igual Erro, 1 igual Acerto
 var parMovesStatus = Dictionary()
 
 ## --------------------MAIN---------------------
@@ -139,7 +138,7 @@ func revealCards():
 		for c in deck:
 			c.flip()
 		
-		await get_tree().create_timer(2.0).timeout
+		await get_tree().create_timer(3.0).timeout
 		
 		for c in deck:
 			c.flip()
@@ -148,8 +147,6 @@ func revealCards():
 		exitButton.set_disabled(false)
 		pauseButton.can_pause = true
 		pauseButton.set_disabled(false)
-	
-	
 
 
 ## Ponteiro para carta

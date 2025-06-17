@@ -1,8 +1,6 @@
 extends Control
 
 var playButton
-var press
-
 
 ## Adicionar PopUp à cena
 func _ready():
