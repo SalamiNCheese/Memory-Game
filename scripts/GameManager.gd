@@ -3,14 +3,16 @@ extends Node
 ## Arquivo Global
 
 ## Onde a Game Scene está
-@onready var Game = get_node('/root/Game/') ## Dá ao GameManager um ponteiro, permite ela acessar a Cena do jogo
+## Dá ao GameManager um ponteiro, permite ela acessar a Cena do jogo
+@onready var Game = get_node('/root/Game/')
 @onready var scoreLabel = Game.get_node("HUD/Panel/Sections/SectionScore/ScoreLabel")
 @onready var timerSecLabel = Game.get_node("HUD/Panel/Sections/SectionTimer/TimerLabel")
 @onready var movesLabel = Game.get_node("HUD/Panel/Sections/SectionMoves/MovesLabel")
+
 ## ------------------DECLARAÇÃO DE VARIÁVEIS---------------------
 
 ## Carregar arquivo previamente
-var cardBack = preload('res://assets/cards/card-back.png') ## PS: Eventualmente deixar o jogador escolher o verso
+var cardBack = preload('res://assets/cards/card-back.png') 
 var popUp = preload('res://scripts/PopUp.tscn')
 
 var deck =  Array()
@@ -29,7 +31,6 @@ var hudCount = Array() ## 1º= Score, 2º = Timer, 3º = Moves
 
 var goal = 10
 
-
 var resetButton
 var exitButton
 var pauseButton
@@ -44,6 +45,7 @@ var reaction = Array()
 var perfect = 0
 var reveal_button = false
 var parMovesStatus = Dictionary()
+var is_busy = false
 
 ## --------------------MAIN---------------------
 func _ready():
@@ -95,28 +97,28 @@ func setupTimers():
 ## Preencher o Deck / Criar cartas
 func fillDeck():
 	if(perfect == 0): ## Ordem de criação, espelhadas
-		var s = 0
+		var i = 0
 		var v = 0
-		while(s < 2):
+		while(i < 2):
 			v = 0
 			while(v < 10):
-				deck.append(Card.new(v))	## s,v = i,j
+				deck.append(Card.new(v))
 				v += 1
-			s += 1
+			i += 1
 
 	elif(perfect == 1): ## Ordem de criação, seguidas
-		var s = 0
+		var i = 0
 		var v = 0
 		var v2 = 0
-		while(s < 2):
+		while(i < 2):
 			v2 = 0
 			while(v2 < 5):
-				deck.append(Card.new(v))	## s,v = i,j
+				deck.append(Card.new(v))
 				deck.append(Card.new(v))
 				v += 1
 				v2 += 1
 			v = 5
-			s += 1
+			i += 1
 
 ## Distribuir as Cartas / Colocar no tabuleiro
 func dealDeck():
@@ -126,10 +128,14 @@ func dealDeck():
 		Game.get_node('grid').add_child(deck[c])
 		c += 1
 
+## Revelar cartas (opcional)
 func revealCards():
 	if(reveal_button == false):
 		return
+	
 	else:
+		## Impedir jogador de clicar quando não deve
+		is_busy = true
 		pauseButton.can_pause = false
 		resetButton.set_disabled(true)
 		exitButton.set_disabled(true)
@@ -143,14 +149,20 @@ func revealCards():
 		for c in deck:
 			c.flip()
 		
+		## Habilitar jogador pra clicar novamente
 		resetButton.set_disabled(false)
 		exitButton.set_disabled(false)
 		pauseButton.can_pause = true
 		pauseButton.set_disabled(false)
+		is_busy = false
 
 
 ## Ponteiro para carta
 func chooseCard(c):
+	##Impedir de escolher quando está ocupado
+	if(is_busy == true):
+		return
+	
 	## Impedir de escolher quando é nulo
 	if(c == null || !is_instance_valid(c)):
 		return
@@ -211,7 +223,6 @@ func matchCardsAndScore():
 	
 	## Quando vencer o jogo
 	if(score == goal):
-		## Jogo normal (Sem comentar) VS Jogo Teste Bot (Comentado)
 		var winScreen = popUp.instantiate()
 		Game.add_child(winScreen)
 		winScreen.setupWinScreen()
@@ -250,7 +261,7 @@ func resetGame(show_reveal = true):
 	deck.shuffle() ## Para fazer o aleatório
 	dealDeck()
 	
-	if(show_reveal):
+	if(show_reveal == true):
 		revealCards()
 
 ## Sair do jogo
@@ -268,24 +279,9 @@ func exitGame():
 	saveData3(str(parMovesStatus))
 	print(parMovesStatus)
 	parMovesStatus.clear()
-	OS.shell_open(ProjectSettings.globalize_path("user://"))
+	OS.shell_open(ProjectSettings.globalize_path("user://")) ## Abrir pasta para dados
 	get_tree().quit()
 
-## Carregar Dados
-func loadData():
-	var file = FileAccess.open("user://Dados.txt", FileAccess.READ)
-	var content = file.get_as_text()
-	return content
-
-func loadData2():
-	var file2 = FileAccess.open("user://Dados2.txt", FileAccess.READ)
-	var content2 = file2.get_as_text()
-	return content2
-
-func loadData3():
-	var file3 = FileAccess.open("user://Dados3.txt", FileAccess.READ)
-	var content3 = file3.get_as_text()
-	return content3
 
 ## Salvar Dados
 func saveData(content):

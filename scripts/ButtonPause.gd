@@ -5,6 +5,7 @@ var can_pause = true
 func _ready():
 	pass
 
+## Quando pressionar o botão esquerdo do mouse
 func _pressed():
 	if(!can_pause):
 		return
